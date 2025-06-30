@@ -19,7 +19,7 @@ public class Provincia {
     @Column(unique = true, nullable = false)
     private String nombre;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Por defecto es EAGER, pero LAZY es mejor para rendimiento
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id", nullable = false)
     @JsonBackReference
     private Region region;

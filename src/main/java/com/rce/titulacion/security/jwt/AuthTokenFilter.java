@@ -17,6 +17,17 @@ import com.rce.titulacion.security.services.UserDetailsServiceImpl;
 
 import java.io.IOException;
 
+/**
+ * Filtro de autenticación JWT para procesar tokens en las peticiones HTTP.
+ * 
+ * Este filtro se ejecuta una vez por petición HTTP e intercepta las solicitudes
+ * para extraer y validar tokens JWT del header Authorization. Si el token es
+ * válido, establece la autenticación en el contexto de seguridad de Spring.
+ * 
+ * @author Kevin
+ * @version 1.0
+ * @since 2025
+ */
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
@@ -26,6 +37,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
+    /**
+     * Procesa cada petición HTTP para extraer y validar tokens JWT.
+     * 
+     * Este método extrae el token JWT del header Authorization, lo valida,
+     * y si es válido, carga los detalles del usuario y establece la
+     * autenticación en el contexto de seguridad de Spring.
+     * 
+     * @param request Petición HTTP entrante
+     * @param response Respuesta HTTP
+     * @param filterChain Cadena de filtros para continuar el procesamiento
+     * @throws ServletException Si ocurre un error durante el filtrado
+     * @throws IOException Si ocurre un error de entrada/salida
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -48,6 +72,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Extrae el token JWT del header Authorization de la petición HTTP.
+     * 
+     * Busca el header "Authorization" y extrae el token JWT removiendo
+     * el prefijo "Bearer ". Si el header no existe o no tiene el formato
+     * correcto, retorna null.
+     * 
+     * @param request Petición HTTP de la cual extraer el token
+     * @return String Token JWT sin el prefijo "Bearer ", o null si no se encuentra
+     */
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 

@@ -9,6 +9,17 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Collections;
 
+/**
+ * Implementación personalizada de UserDetails para Spring Security.
+ * 
+ * Esta clase adapta la entidad User del sistema a la interfaz UserDetails
+ * requerida por Spring Security. Proporciona la información necesaria
+ * para la autenticación y autorización de usuarios.
+ * 
+ * @author Kevin
+ * @version 1.0
+ * @since 2025
+ */
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
@@ -19,12 +30,28 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
+    /**
+     * Constructor para crear una instancia de UserDetailsImpl.
+     * 
+     * @param id ID único del usuario
+     * @param username Nombre de usuario
+     * @param password Contraseña encriptada del usuario
+     */
     public UserDetailsImpl(Long id, String username, String password) {
         this.id = id;
         this.username = username;
         this.password = password;
     }
 
+    /**
+     * Método de fábrica para crear UserDetailsImpl desde una entidad User.
+     * 
+     * Convierte una entidad User del sistema en un objeto UserDetailsImpl
+     * que puede ser utilizado por Spring Security para autenticación.
+     * 
+     * @param user Entidad User a convertir
+     * @return UserDetailsImpl Nueva instancia creada a partir del usuario
+     */
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
                 user.getId(),
@@ -32,24 +59,44 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword());
     }
 
+    /**
+     * Obtiene las autoridades (roles) concedidas al usuario.
+     * 
+     * En la implementación actual, retorna una lista vacía ya que
+     * no se han definido roles específicos en el sistema.
+     * 
+     * @return Collection<? extends GrantedAuthority> Lista vacía de autoridades
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Por ahora, no hay roles específicos definidos más allá de "administrador"
-        // Si en el futuro necesitas roles (ej. ADMIN, USER), los agregarías aquí.
         return Collections.emptyList();
     }
 
+    /**
+     * Obtiene la contraseña del usuario.
+     * 
+     * @return String Contraseña encriptada del usuario
+     */
     @Override
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Obtiene el nombre de usuario.
+     * 
+     * @return String Nombre de usuario
+     */
     @Override
     public String getUsername() {
         return username;
     }
 
-     // Getter for ID
+    /**
+     * Obtiene el ID único del usuario.
+     * 
+     * @return Long ID del usuario
+     */
     public Long getId() {
         return id;
     }

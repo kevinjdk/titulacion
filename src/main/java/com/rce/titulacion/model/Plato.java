@@ -37,10 +37,10 @@ public class Plato {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String ingredientes;
 
-    @ElementCollection(fetch = FetchType.EAGER) // EAGER para que los pasos siempre se carguen con el plato
-    @CollectionTable(name = "plato_preparacion_pasos", joinColumns = @JoinColumn(name = "plato_id")) // Define la tabla intermedia
-    @OrderColumn // Mantiene el orden de la lista
-    @Column(name = "paso", nullable = false, columnDefinition = "TEXT") // Define la columna para los pasos
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "plato_preparacion_pasos", joinColumns = @JoinColumn(name = "plato_id"))
+    @OrderColumn
+    @Column(name = "paso", nullable = false, columnDefinition = "TEXT")
     private List<String> preparacion;
 
     private String imageUrl;
