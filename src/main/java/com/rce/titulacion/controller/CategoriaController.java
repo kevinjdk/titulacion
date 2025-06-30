@@ -1,6 +1,7 @@
 package com.rce.titulacion.controller;
 
 import com.rce.titulacion.model.Categoria;
+import com.rce.titulacion.exception.ResourceNotFoundException;
 import com.rce.titulacion.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.rce.titulacion.payload.response.ApiResponse;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,49 +22,49 @@ public class CategoriaController {
     private CategoriaService categoriaService;
 
     // Consulta pública
-    @GetMapping
-    public ResponseEntity<List<Categoria>> getAllCategorias() {
+    @GetMapping // Ahora devuelve ApiResponse<List<Categoria>>
+    public ResponseEntity<ApiResponse<List<Categoria>>> getAllCategorias() {
         List<Categoria> categorias = categoriaService.findAllCategorias();
-        return ResponseEntity.ok(categorias);
+        return ResponseEntity.ok(ApiResponse.success("Categorías recuperadas exitosamente", categorias));
     }
 
     // Consulta pública por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Categoria> getCategoriaById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Categoria>> getCategoriaById(@PathVariable Long id) {
         Optional<Categoria> categoria = categoriaService.findCategoriaById(id);
-        return categoria.map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.notFound().build());
+        return categoria.map(c -> ResponseEntity.ok(ApiResponse.success("Categoría recuperada exitosamente", c)))
+                        .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
     }
 
     // Solo para administrador
     @PreAuthorize("isAuthenticated()")
     @PostMapping
-    public ResponseEntity<Categoria> createCategoria(@RequestBody Categoria categoria) {
+    public ResponseEntity<ApiResponse<Categoria>> createCategoria(@RequestBody Categoria categoria) {
         Categoria newCategoria = categoriaService.saveCategoria(categoria);
-        return new ResponseEntity<>(newCategoria, HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Categoría creada exitosamente", newCategoria), HttpStatus.CREATED);
     }
 
     // Solo para administrador
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> updateCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
+    public ResponseEntity<ApiResponse<Categoria>> updateCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
         return categoriaService.findCategoriaById(id)
                 .map(existingCategoria -> {
                     categoria.setId(id);
                     Categoria updatedCategoria = categoriaService.saveCategoria(categoria);
-                    return ResponseEntity.ok(updatedCategoria);
+                    return ResponseEntity.ok(ApiResponse.success("Categoría actualizada exitosamente", updatedCategoria));
                 })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
     }
 
     // Solo para administrador
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategoria(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategoria(@PathVariable Long id) {
         if (categoriaService.findCategoriaById(id).isPresent()) {
             categoriaService.deleteCategoria(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(ApiResponse.success("Categoría eliminada exitosamente"));
         }
-        return ResponseEntity.notFound().build();
+        throw new ResourceNotFoundException("Categoría no encontrada con ID: " + id);
     }
 }

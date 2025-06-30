@@ -1,49 +1,50 @@
 package com.rce.titulacion.payload.response.dto;
 
 import com.rce.titulacion.model.Plato;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PlatoResponseDTO {
     private Long id;
     private String nombre;
     private String descripcion;
     private String ingredientes;
-    private String preparacion;
+    private List<String> preparacion; // Cambiado a List<String>
     private String imageUrl;
+    private CategoriaDTO categoria;
+    private ProvinciaDTO provincia;
+    private RegionDTO region;
 
-    // DTOs para las relaciones, que solo incluyen los campos que te interesan
-    private Long regionId;
-    private String regionNombre;
-    private Long provinciaId;
-    private String provinciaNombre;
-    private Long categoriaId;
-    private String categoriaNombre;
-
-    // Constructor o métodos de mapeo para convertir de entidad a DTO
+    /**
+     * Método de fábrica estático para convertir una entidad Plato a un PlatoResponseDTO.
+     * Este método se encarga de mapear los campos, incluyendo las entidades relacionadas,
+     * a sus respectivos DTOs para una respuesta limpia al cliente.
+     *
+     * @param plato La entidad Plato a convertir.
+     * @return Un nuevo objeto PlatoResponseDTO.
+     */
     public static PlatoResponseDTO fromEntity(Plato plato) {
-        PlatoResponseDTO dto = new PlatoResponseDTO();
-        dto.setId(plato.getId());
-        dto.setNombre(plato.getNombre());
-        dto.setDescripcion(plato.getDescripcion());
-        dto.setIngredientes(plato.getIngredientes());
-        dto.setPreparacion(plato.getPreparacion());
-        dto.setImageUrl(plato.getImageUrl());
+        if (plato == null) {
+            return null;
+        }
 
-        // Asegúrate de que las entidades relacionadas no sean null antes de acceder a ellas
-        if (plato.getRegion() != null) {
-            dto.setRegionId(plato.getRegion().getId());
-            dto.setRegionNombre(plato.getRegion().getNombre());
-        }
-        if (plato.getProvincia() != null) {
-            dto.setProvinciaId(plato.getProvincia().getId());
-            dto.setProvinciaNombre(plato.getProvincia().getNombre());
-        }
-        if (plato.getCategoria() != null) {
-            dto.setCategoriaId(plato.getCategoria().getId());
-            dto.setCategoriaNombre(plato.getCategoria().getNombre());
-        }
-        return dto;
+        return new PlatoResponseDTO(
+                plato.getId(),
+                plato.getNombre(),
+                plato.getDescripcion(),
+                plato.getIngredientes(),
+                plato.getPreparacion(), // Se asigna directamente la lista
+                plato.getImageUrl(),
+                // Mapea las entidades anidadas a sus DTOs correspondientes
+                new CategoriaDTO(plato.getCategoria().getId(), plato.getCategoria().getNombre()),
+                new ProvinciaDTO(plato.getProvincia().getId(), plato.getProvincia().getNombre()),
+                new RegionDTO(plato.getRegion().getId(), plato.getRegion().getNombre())
+        );
     }
 }
