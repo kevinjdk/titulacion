@@ -43,5 +43,8 @@ public class Plato {
     @Column(name = "paso", nullable = false, columnDefinition = "TEXT")
     private List<String> preparacion;
 
+    @Column(nullable = false)
+    private Integer porciones;
+
     private String imageUrl;
 }

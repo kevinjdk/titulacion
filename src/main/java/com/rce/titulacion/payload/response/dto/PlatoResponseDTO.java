@@ -16,6 +16,7 @@ public class PlatoResponseDTO {
     private String descripcion;
     private String ingredientes;
     private List<String> preparacion;
+    private Integer porciones;
     private String imageUrl;
     private CategoriaDTO categoria;
     private ProvinciaDTO provincia;
@@ -32,6 +33,7 @@ public class PlatoResponseDTO {
                 plato.getDescripcion(),
                 plato.getIngredientes(),
                 plato.getPreparacion(),
+                plato.getPorciones(),
                 plato.getImageUrl(),
                 new CategoriaDTO(plato.getCategoria().getId(), plato.getCategoria().getNombre()),
                 new ProvinciaDTO(plato.getProvincia().getId(), plato.getProvincia().getNombre()),
