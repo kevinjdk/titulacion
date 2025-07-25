@@ -60,7 +60,7 @@ public class CategoriaController {
      * @throws ResourceNotFoundException si no se encuentra una categoría con el ID especificado
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Categoria>> getCategoriaById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Categoria>> getCategoriaById(@PathVariable("id") Long id) {
         Optional<Categoria> categoria = categoriaService.findCategoriaById(id);
         return categoria.map(c -> ResponseEntity.ok(ApiResponse.success("Categoría recuperada exitosamente", c)))
                         .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
@@ -98,7 +98,7 @@ public class CategoriaController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Categoria>> updateCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
+    public ResponseEntity<ApiResponse<Categoria>> updateCategoria(@PathVariable("id") Long id, @RequestBody Categoria categoria) {
         return categoriaService.findCategoriaById(id)
                 .map(existingCategoria -> {
                     categoria.setId(id);
@@ -123,7 +123,7 @@ public class CategoriaController {
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCategoria(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategoria(@PathVariable("id") Long id) {
         if (categoriaService.findCategoriaById(id).isPresent()) {
             categoriaService.deleteCategoria(id);
             return ResponseEntity.ok(ApiResponse.success("Categoría eliminada exitosamente"));

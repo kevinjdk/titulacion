@@ -1,6 +1,7 @@
 package com.rce.titulacion.controller;
 
 import com.rce.titulacion.model.Provincia;
+import com.rce.titulacion.dto.ProvinciaResponseDTO;
 import com.rce.titulacion.exception.ResourceNotFoundException;
 import com.rce.titulacion.service.ProvinciaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.rce.titulacion.payload.response.ApiResponse;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Controlador REST para la gestión de provincias.
@@ -44,9 +46,18 @@ public class ProvinciaController {
      * @return ResponseEntity conteniendo ApiResponse con la lista de Provincia
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Provincia>>> getAllProvincias() {
+    public ResponseEntity<ApiResponse<List<ProvinciaResponseDTO>>> getAllProvincias() {
         List<Provincia> provincias = provinciaService.findAllProvincias();
-        return ResponseEntity.ok(ApiResponse.success("Provincias recuperadas exitosamente", provincias));
+        List<ProvinciaResponseDTO> response = provincias.stream()
+            .map(p -> new ProvinciaResponseDTO(
+                p.getId(),
+                p.getNombre(),
+                p.getRegion() != null 
+                    ? new ProvinciaResponseDTO.RegionSummaryDTO(p.getRegion().getId(), p.getRegion().getNombre())
+                    : null
+            ))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success("Provincias recuperadas exitosamente", response));
     }
 
     /**
@@ -61,10 +72,18 @@ public class ProvinciaController {
      * @throws ResourceNotFoundException si no se encuentra una provincia con el ID especificado
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Provincia>> getProvinciaById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProvinciaResponseDTO>> getProvinciaById(@PathVariable("id") Long id) {
         Optional<Provincia> provincia = provinciaService.findProvinciaById(id);
-        return provincia.map(p -> ResponseEntity.ok(ApiResponse.success("Provincia recuperada exitosamente", p)))
-                        .orElseThrow(() -> new ResourceNotFoundException("Provincia no encontrada con ID: " + id));
+        return provincia.map(p -> {
+            ProvinciaResponseDTO response = new ProvinciaResponseDTO(
+                p.getId(),
+                p.getNombre(),
+                p.getRegion() != null 
+                    ? new ProvinciaResponseDTO.RegionSummaryDTO(p.getRegion().getId(), p.getRegion().getNombre())
+                    : null
+            );
+            return ResponseEntity.ok(ApiResponse.success("Provincia recuperada exitosamente", response));
+        }).orElseThrow(() -> new ResourceNotFoundException("Provincia no encontrada con ID: " + id));
     }
 
     /**
@@ -78,12 +97,21 @@ public class ProvinciaController {
      * @return ResponseEntity conteniendo ApiResponse con la lista de Provincia de la región especificada
      */
     @GetMapping("/region/{regionId}")
-    public ResponseEntity<ApiResponse<List<Provincia>>> getProvinciasByRegionId(@PathVariable Long regionId) {
+    public ResponseEntity<ApiResponse<List<ProvinciaResponseDTO>>> getProvinciasByRegionId(@PathVariable("regionId") Long regionId) {
         List<Provincia> provincias = provinciaService.findProvinciasByRegionId(regionId);
-        if (provincias.isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.success("No se encontraron provincias para la región con ID: " + regionId, provincias));
+        List<ProvinciaResponseDTO> response = provincias.stream()
+            .map(p -> new ProvinciaResponseDTO(
+                p.getId(),
+                p.getNombre(),
+                p.getRegion() != null 
+                    ? new ProvinciaResponseDTO.RegionSummaryDTO(p.getRegion().getId(), p.getRegion().getNombre())
+                    : null
+            ))
+            .collect(Collectors.toList());
+        if (response.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.success("No se encontraron provincias para la región con ID: " + regionId, response));
         }
-        return ResponseEntity.ok(ApiResponse.success("Provincias para la región recuperadas exitosamente", provincias));
+        return ResponseEntity.ok(ApiResponse.success("Provincias para la región recuperadas exitosamente", response));
     }
 
     /**
@@ -118,7 +146,7 @@ public class ProvinciaController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Provincia>> updateProvincia(@PathVariable Long id, @RequestBody Provincia provincia) {
+    public ResponseEntity<ApiResponse<Provincia>> updateProvincia(@PathVariable("id") Long id, @RequestBody Provincia provincia) {
         return provinciaService.findProvinciaById(id)
                 .map(existingProvincia -> {
                     provincia.setId(id);
@@ -143,7 +171,7 @@ public class ProvinciaController {
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProvincia(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteProvincia(@PathVariable("id") Long id) {
         if (provinciaService.findProvinciaById(id).isPresent()) {
             provinciaService.deleteProvincia(id);
             return ResponseEntity.ok(ApiResponse.success("Provincia eliminada exitosamente"));

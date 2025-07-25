@@ -15,11 +15,11 @@ public class ProvinciaService {
     private ProvinciaRepository provinciaRepository;
 
     public List<Provincia> findAllProvincias() {
-        return provinciaRepository.findAll();
+        return provinciaRepository.findAllWithRegion();
     }
 
     public Optional<Provincia> findProvinciaById(Long id) {
-        return provinciaRepository.findById(id);
+        return provinciaRepository.findByIdWithRegion(id);
     }
 
     public Provincia saveProvincia(Provincia provincia) {

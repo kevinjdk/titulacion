@@ -64,7 +64,7 @@ public class PlatoController {
      * @throws ResourceNotFoundException si no se encuentra un plato con el ID especificado
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PlatoResponseDTO>> getPlatoById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PlatoResponseDTO>> getPlatoById(@PathVariable("id") Long id) {
         Optional<Plato> plato = platoService.findPlatoById(id);
         return plato.map(p -> ResponseEntity.ok(ApiResponse.success("Plato recuperado exitosamente", PlatoResponseDTO.fromEntity(p))))
                      .orElseThrow(() -> new ResourceNotFoundException("Plato no encontrado con ID: " + id));
@@ -125,7 +125,7 @@ public class PlatoController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Plato>> updatePlato(@PathVariable Long id, @RequestBody Plato plato) {
+    public ResponseEntity<ApiResponse<Plato>> updatePlato(@PathVariable("id") Long id, @RequestBody Plato plato) {
         return platoService.findPlatoById(id)
                 .map(existingPlato -> {
                     plato.setId(id);
@@ -149,7 +149,7 @@ public class PlatoController {
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deletePlato(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deletePlato(@PathVariable("id") Long id) {
         if (platoService.findPlatoById(id).isPresent()) {
             platoService.deletePlato(id);
             return ResponseEntity.ok(ApiResponse.success("Plato eliminado exitosamente"));

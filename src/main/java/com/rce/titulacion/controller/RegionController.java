@@ -60,7 +60,7 @@ public class RegionController {
      * @throws ResourceNotFoundException si no se encuentra una región con el ID especificado
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Region>> getRegionById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Region>> getRegionById(@PathVariable("id") Long id) {
         Optional<Region> region = regionService.findRegionById(id);
         return region.map(r -> ResponseEntity.ok(ApiResponse.success("Región recuperada exitosamente", r)))
                      .orElseThrow(() -> new ResourceNotFoundException("Región no encontrada con ID: " + id));
@@ -99,7 +99,7 @@ public class RegionController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Region>> updateRegion(@PathVariable Long id, @RequestBody Region region) {
+    public ResponseEntity<ApiResponse<Region>> updateRegion(@PathVariable("id") Long id, @RequestBody Region region) {
         return regionService.findRegionById(id)
                 .map(existingRegion -> {
                     region.setId(id);
@@ -124,7 +124,7 @@ public class RegionController {
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteRegion(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteRegion(@PathVariable("id") Long id) {
         if (regionService.findRegionById(id).isPresent()) {
             regionService.deleteRegion(id);
             return ResponseEntity.ok(ApiResponse.success("Región eliminada exitosamente"));
