@@ -4,6 +4,7 @@ import com.rce.titulacion.model.Plato;
 import com.rce.titulacion.exception.ResourceNotFoundException;
 import com.rce.titulacion.payload.response.ApiResponse;
 import com.rce.titulacion.payload.response.dto.*;
+import com.rce.titulacion.payload.request.CreatePlatoRequest;
 import com.rce.titulacion.service.PlatoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -97,16 +98,16 @@ public class PlatoController {
      * 
      * Este endpoint protegido permite a usuarios autenticados crear nuevos platos.
      * El plato debe incluir toda la información requerida como nombre, descripción,
-     * ingredientes, preparación, y las referencias a categoría, provincia y región.
+     * ingredientes, preparación, y los IDs de categoría, provincia y región.
      * 
-     * @param plato La entidad Plato a crear con todos los datos necesarios
+     * @param request La entidad CreatePlatoRequest a crear con todos los datos necesarios
      * @return ResponseEntity conteniendo ApiResponse con el Plato creado
      * @throws org.springframework.security.access.AccessDeniedException si el usuario no está autenticado
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping
-    public ResponseEntity<ApiResponse<Plato>> createPlato(@RequestBody Plato plato) {
-        Plato newPlato = platoService.savePlato(plato);
+    public ResponseEntity<ApiResponse<Plato>> createPlato(@RequestBody CreatePlatoRequest request) {
+        Plato newPlato = platoService.createPlatoFromRequest(request);
         return new ResponseEntity<>(ApiResponse.success("Plato creado exitosamente", newPlato), HttpStatus.CREATED);
     }
 
@@ -118,18 +119,17 @@ public class PlatoController {
      * especifica en la URL y debe coincidir con un plato existente.
      * 
      * @param id El identificador único del plato a actualizar
-     * @param plato La entidad Plato con los datos actualizados
+     * @param request La entidad CreatePlatoRequest con los datos actualizados
      * @return ResponseEntity conteniendo ApiResponse con el Plato actualizado
      * @throws ResourceNotFoundException si no se encuentra un plato con el ID especificado
      * @throws org.springframework.security.access.AccessDeniedException si el usuario no está autenticado
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Plato>> updatePlato(@PathVariable("id") Long id, @RequestBody Plato plato) {
+    public ResponseEntity<ApiResponse<Plato>> updatePlato(@PathVariable("id") Long id, @RequestBody CreatePlatoRequest request) {
         return platoService.findPlatoById(id)
                 .map(existingPlato -> {
-                    plato.setId(id);
-                    Plato updatedPlato = platoService.savePlato(plato);
+                    Plato updatedPlato = platoService.updatePlatoFromRequest(id, request);
                     return ResponseEntity.ok(ApiResponse.success("Plato actualizado exitosamente", updatedPlato));
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Plato no encontrado con ID: " + id));
