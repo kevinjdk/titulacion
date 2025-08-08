@@ -2,6 +2,8 @@ package com.rce.titulacion.controller;
 
 import com.rce.titulacion.security.jwt.JwtUtils;
 import com.rce.titulacion.security.services.UserDetailsImpl;
+import com.rce.titulacion.service.UserService;
+import com.rce.titulacion.model.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.rce.titulacion.payload.request.LoginRequest;
+import com.rce.titulacion.payload.request.RegisterRequest;
 import com.rce.titulacion.payload.response.JwtResponse;
+import com.rce.titulacion.payload.response.ApiResponse;
+import com.rce.titulacion.payload.response.ErrorResponse;
 
 /**
  * Controlador REST para la gestión de autenticación de usuarios.
@@ -34,6 +39,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    UserService userService;
 
     /**
      * Autentica un usuario y genera un token JWT.
@@ -60,5 +68,28 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(jwt,
                                                  userDetails.getId(),
                                                  userDetails.getUsername()));
+    }
+
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * 
+     * Este endpoint público permite el registro de nuevos usuarios en el sistema.
+     * Valida que el nombre de usuario y email sean únicos antes de crear la cuenta.
+     * La contraseña se encripta automáticamente antes del almacenamiento.
+     * 
+     * @param registerRequest Objeto que contiene los datos del nuevo usuario (username, password, email)
+     * @return ResponseEntity conteniendo ApiResponse con el resultado del registro
+     * @throws RuntimeException si el username o email ya están en uso
+     */
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        try {
+            User user = userService.register(registerRequest);
+            return ResponseEntity.ok(ApiResponse.success("Usuario registrado exitosamente", user));
+        } catch (RuntimeException e) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.error("Error en el registro", errorResponse));
+        }
     }
 }
